@@ -38,7 +38,7 @@ export class UserService {
       user,
     };
   }
-  async loginUser(data: LoginUserDto) {
+  async loginUser(data: LoginUserDto, res) {
     const user = await this.prisma.user.findFirst({
       where: {
         email: data.email,
@@ -56,12 +56,35 @@ export class UserService {
 
     const token = this.generateToken(user);
 
+    res.cookie('token', token.accessToken, {
+      httpOnly: true,
+    });
+    res.cookie('refresh-token', token.refreshToken, {
+      httpOnly: true,
+    });
     return {
       message: 'User login successful',
       result,
       accessToken: token.accessToken,
       refreshToken: token.refreshToken,
     };
+  }
+
+  async profile(req) {
+    const { id } = req.user;
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const { password, ...result } = user;
+
+    return { user: result };
   }
 
   async refresh(token: string) {

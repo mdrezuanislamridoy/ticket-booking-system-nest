@@ -1,7 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUserDto.dto';
 import { LoginUserDto } from './dto/loginUserDto';
+import { JwtAuthGuard } from './guards/jwt.guard';
 
 @Controller('user')
 export class UserController {
@@ -13,8 +22,14 @@ export class UserController {
   }
 
   @Post('login')
-  loginUser(@Body() userData: LoginUserDto) {
-    return this.userService.loginUser(userData);
+  loginUser(@Body() userData: LoginUserDto, @Res({ passthrough: true }) res) {
+    return this.userService.loginUser(userData, res);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  profile(@Req() req): any {
+    return this.userService.profile(req);
   }
 
   @Post('refresh')
