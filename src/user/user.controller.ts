@@ -11,6 +11,9 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/createUserDto.dto';
 import { LoginUserDto } from './dto/loginUserDto';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { Roles } from './decorators/role.decorator';
+import { Role } from '@prisma/client';
+import { RoleGuard } from './guards/role.guard';
 
 @Controller('user')
 export class UserController {
@@ -30,6 +33,14 @@ export class UserController {
   @Get('profile')
   profile(@Req() req): any {
     return this.userService.profile(req);
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(JwtAuthGuard)
+  @Get('dashboard')
+  dashboard() {
+    return 'Dashboard';
   }
 
   @Post('refresh')

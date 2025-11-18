@@ -122,6 +122,7 @@ export class UserService {
       },
     );
   }
+
   private generateRefreshToken(user: User) {
     return this.jwtService.sign(
       { id: user.id },
